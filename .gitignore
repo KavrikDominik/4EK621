@@ -37,3 +37,7 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+.ipynb_checkpoints
+
+week_1/.ipynb_checkpoints
