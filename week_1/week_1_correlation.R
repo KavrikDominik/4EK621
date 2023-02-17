@@ -34,12 +34,20 @@ data %>%
 
 library(manipulate)
 
+
+muX = 0
+muY = 0
+sdX = 1
+sdY = 1
+
 makeData <- function(theta, N){
   set.seed(123)
-  X = rnorm(N, 2, 1)
-  Y = theta*X + 2 + rnorm(N,0,1)
+  Z = rnorm(N)
+  X = muX + sdX*Z
+  Y = muY + sdY*(theta*Z + sqrt(1-theta^2)*rnorm(N))
   return(tibble(X,Y))
 }
+
 
 manipulate(plot(
   makeData(theta = th, 1000),
@@ -49,8 +57,8 @@ manipulate(plot(
       makeData(theta = th, 100)
     )[2])
   ),
-  xlim = c(0, 8),
-  ylim = c(0, 10)
+  xlim = c(-4, 4),
+  ylim = c(-4, 5)
 ),
-th = slider(0.05, 2, 0.05)
+th = slider(0, 1, 0.01)
 )
