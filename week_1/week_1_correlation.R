@@ -5,7 +5,6 @@ library(tidyr)
 
 data <- readr::read_csv("week_1/data/starbucks-menu-nutrition-food.csv",
                         locale = readr::locale(encoding = "UTF-16"))
-
 colnames(data)
 
 data <- data %>%
@@ -20,7 +19,6 @@ num_vars <- data %>%
 corrplot_input <- cor(num_vars) 
 
 corrplot::corrplot(corrplot_input, method = "number")
-
 
 data %>% 
   select(Calories, `Protein (g)`) %>% 
@@ -56,4 +54,3 @@ manipulate(plot(
 ),
 th = slider(0.05, 2, 0.05)
 )
-

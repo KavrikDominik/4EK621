@@ -84,7 +84,6 @@ The mean is not a robust measure of the central tendency of wages in this case, 
 
 ```{r}
 data %>% 
-mutate(black = as.factor(black)) %>%
 ggplot(aes(x = log(wage)))+
 geom_histogram(aes(y=..density..), fill = "dodgerblue2", colour = "white")+
 geom_density(lwd=1.5)+
