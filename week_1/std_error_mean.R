@@ -14,13 +14,12 @@ mean(popul$y)
 SEM <- sd(smpl$y) / sqrt( nrow(smpl) )
 SEM
 
-
 # initialize means tibble to store iteration and sample means
 means <- tibble(idx = numeric(),
                 mean = numeric())
 
 # repeat sampling 500x and save means
-for (i in 1:500){
+for (i in 1:1000){
   smpl <- sample_n(popul, n)
   means[i,1] <- i
   means[i,2] <- mean(smpl$y)
@@ -32,7 +31,3 @@ means$mean %>%
 
 # standard error of mean
 sd(means$mean)
-
-
-
-
