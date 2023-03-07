@@ -6,7 +6,7 @@ D <- c() # empty vector initialization
 CC <- list() # empty list initialization
 const <- cbind(rep(1, N)) # column vector of ones for design matrix X
 X <- cbind(const) # matrix X
-Y <- rnorm(N, 2, 2) # column vectrr of dependent variable
+Y <- rnorm(N, 2, 2) # column vector of dependent variable
 
 # now we iterate from 1 to 99 and in each iteration we a new regressor 
 for (i in 1:99) {
