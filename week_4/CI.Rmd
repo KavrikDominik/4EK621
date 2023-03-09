@@ -1,0 +1,120 @@
+---
+title: "confitns"
+author: "Dominik Kavrik"
+date: "2023-03-09"
+output: html_document
+---
+```{r, message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+theme_set(theme_light())
+```
+
+# Simulate a population:
+
+```{r}
+N = 100000
+x = rnorm(N, 1 , 2)
+y = 15 + 30*x + rnorm(N, 2, 60)
+population <- tibble(y,x) 
+```
+
+# pick a random sample and visualize it
+
+```{r}
+n <- 500
+sample <- sample_n(population, n)
+```
+
+```{r}
+sample %>% 
+  ggplot(aes(x,y)) +
+  geom_point() + 
+  labs(title = "Sample Scatterplot",
+       subtitle = paste(n, "observations"))
+```
+# add another layer with regression line:
+
+
+```{r}
+sample %>% 
+  ggplot(aes(x,y)) +
+  geom_point() + 
+  labs(title = "Sample Scatterplot",
+       subtitle = paste(n, "observations")) +
+  geom_smooth(method = "lm")
+```
+
+Notice the grey area. That is the simple regression confidence interval.
+CI is a function of x and is non-linear.
+
+
+
+The line is the fitted value defined as $$\hat{y_i} = \hat{\beta_0} + \hat{\beta_1}x_i$$
+
+We can actually calculate the CI from scratch using the following formula:
+
+$$CI = \hat{y} \pm t_{\alpha/2 \; n-k-1} \times \sqrt{  \hat{\sigma}^2 \bigg( \frac{1}{n} + \frac{(x_i - \bar{x})^2}{\sum_{i=1}^n(x_i - \bar{x})^2}\bigg)}$$
+
+first we need to estimate the model: 
+
+$$y_i = \beta_0 + \beta_1x_i + u_i$$
+
+```{r}
+model <- lm(y ~ x, data = sample)
+summary(model)
+```
+
+$$y_i = \hat{\beta_0}+\hat{\beta_1}x_i+\hat{u_i}$$
+$$y_i = 15.79 + 30.55 x_i + \hat{u_i}$$
+$$\hat{y}_i = \hat{\beta_0}+\hat{\beta_1}x_i$$
+
+$$\hat{u}_i = y_i - \hat{y_i}$$
+
+
+
+and we need to get the estimated variance of the estimator:
+
+$$\hat{\sigma}^2 = \frac{1}{n-2} \sum_{i=1}^n(\hat{u}_i^2)$$
+
+```{r}
+sigma_sq_hat = 1/(n-2)*sum(model$residuals^2)
+```
+
+
+We can easily coerce the model residuals into dataframe using `{broom}` package
+
+```{r}
+CI_data <- broom::augment(model) %>% 
+  select(y,x,.fitted) %>% 
+  rename(fitted = ".fitted") %>% 
+  mutate(upper = fitted + 1.96 * sqrt(sigma_sq_hat* (1/n + (x - mean(x))^2 / ( sum((x-mean(x))^2)) ) )) %>% 
+  mutate(lower = fitted - 1.96 * sqrt(sigma_sq_hat* (1/n + (x - mean(x))^2 / ( sum((x-mean(x))^2)) ) ))
+```
+
+
+
+```{r}
+head(CI_data)
+```
+
+```{r}
+CI_data %>%
+  pivot_longer(names_to = "names", values_to = "values", 3:5) %>% 
+  ggplot(aes(x = x, y=values, color = names, linetype=names))+
+  geom_line()+
+  scale_linetype_manual(values=c("solid", "dashed", "dashed"))
+```
+Now see that it really is the outline of the CI given by the `geom_smooth()`
+
+```{r}
+CI_data %>%
+  pivot_longer(names_to = "names", values_to = "values", 3:5) %>% 
+  ggplot(aes(x = x, y=values, color = names, linetype=names))+
+  geom_line()+
+  scale_linetype_manual(values=c("solid", "dashed", "dashed"))+
+  geom_point(aes(x,y), color = "black", alpha = 0.5, shape = "o")+
+  geom_smooth(aes(x,y), method = "lm")
+```
+
