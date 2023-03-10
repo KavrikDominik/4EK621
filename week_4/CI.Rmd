@@ -55,7 +55,9 @@ The line is the fitted value defined as $$\hat{y_i} = \hat{\beta_0} + \hat{\beta
 
 We can actually calculate the CI from scratch using the following formula:
 
-$$CI = \hat{y} \pm t_{\alpha/2 \; n-k-1} \times \sqrt{  \hat{\sigma}^2 \bigg( \frac{1}{n} + \frac{(x_i - \bar{x})^2}{\sum_{i=1}^n(x_i - \bar{x})^2}\bigg)}$$
+$$\hat{y}_{CI} = \hat{y} \pm t_{\alpha/2 \; n-k-1} \times \sqrt{  \hat{\sigma}^2 \bigg( \frac{1}{n} + \frac{(x_i - \bar{x})^2}{\sum_{i=1}^n(x_i - \bar{x})^2}\bigg)}$$
+
+
 
 first we need to estimate the model: 
 

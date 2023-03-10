@@ -1,0 +1,16 @@
+- readr
+- dplyr
+- tidyr
+- stringr
+- tibble
+- broom
+- ggplot2
+- patchwork
+- stargazer
+- manipulate
+- rmarkdown
+- knitr
+- kableExtra
+- tidyr
+- purrr
+- gganimate
