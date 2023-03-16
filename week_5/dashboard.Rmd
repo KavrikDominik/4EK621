@@ -1,0 +1,56 @@
+---
+title: "Untitled"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+# t-test
+
+## Column {data-width=550 .tabset}
+
+<!-- ### Data preview -->
+
+<!-- ```{r, echo = FALSE, message =FALSE} -->
+<!-- knitr::kable(coef_data_1 %>%  -->
+<!--                mutate(across(where(is.numeric), round, 3)) %>%  -->
+<!--                head() -->
+<!--              ) -->
+<!-- ``` -->
+
+
+
+### Simulated confidence intervals:
+
+
+```{r, echo = FALSE, message =FALSE,fig.height=10, fig.width=8}
+gg_ci
+```
+
+### Simulated regression line:
+
+```{r}
+knitr::include_graphics("assets/goo.gif")
+```
+
+Column {data-width=450}
+-----------------------------------------------------------------------
+
+```{r}
+knitr::kable(t_false_positives %>% 
+               mutate(across(where(is.numeric), round, 3)) %>% 
+               head()
+             )
+```
+
+### t distribution and hypothesis testing
+
+```{r, fig.width=10, fig.height=10}
+t_dist
+```
+
