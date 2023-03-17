@@ -134,6 +134,7 @@ coef_data_model2 <- samples %>%
 coef_data_model2
 
 n_viz <- 300
+k <- 3 # number of terms including constant term
 
 gg_ci <- coef_data_model2 %>%
   head(n_viz) %>%
@@ -151,7 +152,7 @@ gg_ci <- coef_data_model2 %>%
   facet_wrap(~term, scales = "free") +
   labs(
     title = "Confidence intervals",
-    subtitle = paste(n_viz, "samples"),
+    subtitle = paste(n_viz/3, "samples"),
     caption = "Dashed lines are the true values of population parameters"
   ) +
   theme_light()
