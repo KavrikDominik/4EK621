@@ -66,6 +66,9 @@ for (r in 1:R) { # For each replication in i = 1 to R:
   results$UB[r] <- results$beta.1[r] + qt(0.975, n - 2) * summary(OLS)$coefficients[2, 2]
 }
 
+# for 95% samples, the true parameter beta1 = 10 lies within the 95% confidence interval
+sum((results$LB < 10) & (results$UB > 10)) / R * 100
+
 # Resampling for vizualization --------------------------------------------
 # using purrr package...
 
@@ -81,7 +84,7 @@ samples <- tibble(
     ~ pop %>% sample_n(n, replace = TRUE)
   )
 )
-samples
+samples # now we have 1000 different samples saved in one tibble
 
 # Save data and coefficients for wage ~ height ----------------------------
 coef_data_1 <- samples %>%
@@ -89,23 +92,26 @@ coef_data_1 <- samples %>%
     models = map(data, ~ lm(wage ~ height, data = .)),
     coefficients = map(models, broom::tidy)
   ) %>%
-  select(id, coefficients) %>% 
+  select(id, data, coefficients) %>%
   unnest(coefficients)
 
-head(coef_data_1)
+# to see the result of a single regression just `filter()` by id
 
+coef_data_1 %>%
+  filter(id == 10)
 
 
 # add 95% confidence interval:
 
 coef_data_1 %>%
-  head(100) %>% 
-  mutate(lower = estimate - qt(0.975, n - 2) * std.error) %>% 
-  mutate(upper = estimate + qt(0.975, n - 2) * std.error) %>% 
-  ggplot(aes(x= estimate, y = id, color=term)) +
-  geom_point(aes(x= estimate, color = term)) +
-  geom_errorbar(aes(xmin = lower, xmax=upper))+
-  facet_wrap(~term, scales="free")
+  head(100) %>%
+  mutate(lower = estimate - qt(0.975, n - 2) * std.error) %>%
+  mutate(upper = estimate + qt(0.975, n - 2) * std.error) %>%
+  ggplot(aes(x = estimate, y = id, color = term)) +
+  geom_point(aes(x = estimate, color = term)) +
+  geom_errorbar(aes(xmin = lower, xmax = upper)) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  facet_wrap(~term, scales = "free")
 
 # %>%
 #   mutate(coefficients = map(coefficients, ~ .x %>%
@@ -114,45 +120,59 @@ coef_data_1 %>%
 
 
 # Save data with coefficients with irrelevant regressor -------------------
+#
+# create new object from a new model with irrelevant regressor
+#
 coef_data_model2 <- samples %>%
   mutate(
     models = map(data, ~ lm(wage ~ height + irrelevant, data = .)),
     coefficients = map(models, broom::tidy)
-  )  %>% select(id, data, coefficients) %>% 
+  ) %>%
+  select(id, data, coefficients) %>%
   unnest(coefficients)
 
 coef_data_model2
 
-gg_ci <- coef_data_model2 %>% 
-  head(300) %>% 
-  mutate(lower = estimate - qt(0.975, n - 2) * std.error) %>% 
-  mutate(upper = estimate + qt(0.975, n - 2) * std.error) %>% 
-  ggplot(aes(x= estimate, y = id, color=term)) +
-  geom_point(aes(x= estimate, color = term)) +
-  geom_errorbar(aes(xmin = lower, xmax=upper))+
-  geom_vline(xintercept = 0, linetype = "dashed")+
-  facet_wrap(~term, scales="free")+
+n_viz <- 300
+gg_ci <- coef_data_model2 %>%
+  head(n_viz) %>%
+  mutate(lower = estimate - qt(0.975, n - 2) * std.error) %>%
+  mutate(upper = estimate + qt(0.975, n - 2) * std.error) %>%
+  mutate(true_value = case_when(
+    term == "(Intercept)" ~ 5,
+    term == "height" ~ 10,
+    term == "irrelevant" ~ 0
+  )) %>%
+  ggplot(aes(x = estimate, y = id, color = term)) +
+  geom_point(aes(x = estimate, color = term)) +
+  geom_errorbar(aes(xmin = lower, xmax = upper)) +
+  geom_vline(aes(xintercept = true_value), linetype = "dashed") +
+  facet_wrap(~term, scales = "free") +
+  labs(
+    title = "Confidence intervals",
+    subtitle = paste(n_viz, "samples"),
+    caption = "Dashed lines are the true values of population parameters"
+  ) +
   theme_light()
 
 gg_ci
 # Lets investigate the false positives when testing significance o --------
 
-t_false_positives <- coef_data_model2 %>% 
-  mutate(lower = estimate - qt(0.975, n - 2) * std.error) %>% 
-  mutate(upper = estimate + qt(0.975, n - 2) * std.error) %>% 
-  mutate(incl_zero = ifelse(lower<=0&upper >=0, "yes","no")) %>% 
-  group_by(term, incl_zero) %>% 
-  summarise(n = n()) %>% 
+t_false_positives <- coef_data_model2 %>%
+  mutate(lower = estimate - qt(0.975, n - 2) * std.error) %>%
+  mutate(upper = estimate + qt(0.975, n - 2) * std.error) %>%
+  mutate(incl_zero = ifelse(lower <= 0 & upper >= 0, "yes", "no")) %>%
+  group_by(term, incl_zero) %>%
+  summarise(n = n()) %>%
   group_by(term) %>% # now group by only by term so the frequency is correct...
   mutate(freq = n / sum(n)) # ...see the sum(n) in denominator that§s why...
+
 t_false_positives
 # try increasing the number in head()
 
 # ggplots of t-distributions ----------------------------------------------
 t_dist <- coef_data_model2 %>%
-  select(id, data, coefficients) %>%
-  select(id, coefficients) %>%
-  unnest(coefficients) %>%
+  select(-data) %>%
   filter(!term == "(Intercept)") %>%
   select(id, term, statistic) %>%
   ggplot(aes(statistic, fill = term)) +
@@ -173,63 +193,32 @@ t_dist <- coef_data_model2 %>%
 
 t_dist
 
-# mutate(plot = map2(data,coefficients, ~ ggplot(aes(x=height, y=wage), data = .x ) +
-#                      geom_point() +
-#                      geom_abline(data = .y, aes(intercept = `(Intercept)`, slope = height))))
-
 # Resampling animation ----------------------------------------------------
-coef_data <- samples %>%
-  mutate(
-    models = map(data, ~ lm(wage ~ height, data = .)),
-    coefficients = map(models, broom::tidy)
-  ) %>%
-  select(id, data, coefficients) %>%
-  mutate(coefficients = map(coefficients, ~ .x %>%
-    select(term, estimate) %>%
-    pivot_wider(names_from = "term", values_from = "estimate")))
 
 require(gganimate)
-anim <- coef_data %>%
-  head(10) %>%
-  unnest(coefficients) %>%
+resamples_df <- coef_data_1 %>%
+  select(-c(p.value, statistic, std.error)) %>%
+  pivot_wider(names_from = term, values_from = estimate) %>%
+  head(10) %>% # take just first 10 samples
   rename(
-    reg_height = height,
-    Intercept = `(Intercept)`
-  ) %>%
-  unnest(data) %>%
-  group_by(id) %>%
+    Intercept = `(Intercept)`, # now we need to remove "()" from "(Intercept)"
+    Height = height
+  ) %>% # height is already in data, rename to capital H
+  unnest(data) %>% # unncest the data column so we can show the scatterplots
+  group_by(id)
+
+resamples_df
+
+resamples <- resamples_df %>%
   ggplot(aes(height, wage)) +
   geom_point(data = pop, aes(height, wage), alpha = 0.1, shape = "o") +
-  geom_abline(intercept = 5, slope = 10, colour = "black", linetype = "dashed", lwd = 0.5) +
   geom_point(color = "orange", size = 3) +
-  geom_abline(aes(intercept = Intercept, slope = reg_height), color = "dodgerblue3", lwd = 2) +
+  geom_abline(intercept = 5, slope = 10, colour = "black", linetype = "dashed", lwd = 0.5) +
+  geom_abline(aes(intercept = Intercept, slope = Height), color = "dodgerblue3", lwd = 2) +
   theme_light() +
   coord_cartesian(xlim = c(150, 200), ylim = c(1300, 2100)) +
   transition_time(id) +
   ease_aes("exponential-in") +
   labs(title = "Sampling trial: {frame_time}")
 
-
-# Save GIF ----------------------------------------------------------------
-animate(anim, duration = 10, width = 800, height = 800, renderer = gifski_renderer())
-anim_save("week_5/goo.gif")
-
-# Rendering animations ----------------------------------------------------
-
-rmarkdown::render(
-  input = "week_5/test.Rmd",
-  output_dir = "week_5/outputs",
-  output_file = "test.html"
-)
-
-# Rendering html dashboard ------------------------------------------------
-
-rmarkdown::render(
-  input = "week_5/dashboard.Rmd",
-  output_dir = "week_5/outputs",
-  output_file = "dashboard.html"
-)
-
-
-# for 95% samples, the true parameter beta1 = 10 lies within the 95% confidence interval
-sum((results$LB < 10) & (results$UB > 10)) / R * 100
+resamples
