@@ -12,17 +12,7 @@ library(flexdashboard)
 
 # t-test
 
-## Column {data-width=550 .tabset}
-
-<!-- ### Data preview -->
-
-<!-- ```{r, echo = FALSE, message =FALSE} -->
-<!-- knitr::kable(coef_data_1 %>%  -->
-<!--                mutate(across(where(is.numeric), round, 3)) %>%  -->
-<!--                head() -->
-<!--              ) -->
-<!-- ``` -->
-
+## Column {data-width=550}
 
 
 ### Simulated confidence intervals:
@@ -30,12 +20,6 @@ library(flexdashboard)
 
 ```{r, echo = FALSE, message =FALSE,fig.height=10, fig.width=8}
 gg_ci
-```
-
-### Simulated regression line:
-
-```{r}
-knitr::include_graphics("assets/goo.gif")
 ```
 
 Column {data-width=450}

@@ -134,6 +134,7 @@ coef_data_model2 <- samples %>%
 coef_data_model2
 
 n_viz <- 300
+
 gg_ci <- coef_data_model2 %>%
   head(n_viz) %>%
   mutate(lower = estimate - qt(0.975, n - 2) * std.error) %>%
@@ -209,16 +210,37 @@ resamples_df <- coef_data_1 %>%
 
 resamples_df
 
-resamples <- resamples_df %>%
-  ggplot(aes(height, wage)) +
-  geom_point(data = pop, aes(height, wage), alpha = 0.1, shape = "o") +
-  geom_point(color = "orange", size = 3) +
-  geom_abline(intercept = 5, slope = 10, colour = "black", linetype = "dashed", lwd = 0.5) +
-  geom_abline(aes(intercept = Intercept, slope = Height), color = "dodgerblue3", lwd = 2) +
-  theme_light() +
-  coord_cartesian(xlim = c(150, 200), ylim = c(1300, 2100)) +
-  transition_time(id) +
-  ease_aes("exponential-in") +
-  labs(title = "Sampling trial: {frame_time}")
 
-resamples
+# Animation rendering - RUNS LONG -----------------------------------------
+# Animation is already saved in assets folder.
+
+# Runs long
+
+#
+# resamples <- resamples_df %>%
+#   ggplot(aes(height, wage)) +
+#   geom_point(data = pop, aes(height, wage), alpha = 0.1, shape = "o") +
+#   geom_point(color = "orange", size = 3) +
+#   geom_abline(intercept = 5, slope = 10, colour = "black", linetype = "dashed", lwd = 0.5) +
+#   geom_abline(aes(intercept = Intercept, slope = Height), color = "dodgerblue3", lwd = 2) +
+#   theme_light() +
+#   coord_cartesian(xlim = c(150, 200), ylim = c(1300, 2100)) +
+#   transition_time(id) +
+#   ease_aes("exponential-in") +
+#   labs(title = "Sampling trial: {frame_time}")
+#
+# resamples
+
+
+# Dashboard rendering) ----------------------------------------------------
+
+# This is a better way of rendering any rmd file because the object are stored
+# in the environment and do not need to be created again when knitting.
+# This is useful because you don't need to recreate  all object just to fix
+# a typo in your report.
+
+rmarkdown::render(
+  input = "week_5/dashboard.Rmd",
+  output_dir = "week_5/outputs",
+  output_file = "dashboard.html"
+)
