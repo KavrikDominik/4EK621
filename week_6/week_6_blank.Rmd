@@ -1,0 +1,66 @@
+---
+title: 'Week 6'
+author: ""
+date: "2023-03-23"
+output: 
+  html_document:
+    toc: true
+---
+# Packages
+
+```{r, warning=FALSE, echo=FALSE, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(broom)
+library(rsample)
+library(stargazer)
+library(readr)
+library(tidymodels)
+library(forcats)
+library(corrplot)
+```
+
+
+# Loading data
+```{r, message=FALSE, echo=FALSE}
+data = read_csv("sleep.csv")
+```
+
+
+```{r}
+knitr::kable(head(data))
+```
+
+
+# Visualization
+## Sleep boxplots for all educ
+
+
+
+
+
+
+
+## Educ boxplots for all totwrk
+
+# Correlations
+
+# Model 1
+
+$$sleep = \beta_0 + \beta_1 totwrk + \beta_2 educ + \beta_3 age + u$$
+# Linear restriction testing
+
+now we test the following hypothesis:
+
+$$H_0: \beta_2 = \beta_3 = 0$$,
+
+first we need a restricted model:
+
+$$sleep = \beta_0 + \beta_1 totwrk + u$$
+Test the null hypothesis using using `anova()` function
+
+
+
+
+
