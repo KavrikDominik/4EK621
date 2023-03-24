@@ -12,15 +12,22 @@ library(flexdashboard)
 
 # t-test
 
-## Column {data-width=550}
+## Column {data-width=550 .tabset}
 
 
-### Simulated confidence intervals:
+### Simulated confidence intervals
 
 
 ```{r, echo = FALSE, message =FALSE,fig.height=10, fig.width=8}
 gg_ci
 ```
+
+### resampling animation 
+```{r}
+knitr::include_graphics("assets/goo.gif")
+```
+
+
 
 Column {data-width=450}
 -----------------------------------------------------------------------

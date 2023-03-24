@@ -28,7 +28,7 @@ results <- data.frame(beta.0, beta.1)
 sample1 <-
   pop %>%
   slice_sample(n = 100, replace = TRUE) # Choose 100 observations at random
-model1 <- lm(wage ~ height, data = sample1)
+model1 <- lm(wage ~ height + irrelevant, data = sample1)
 summary(model1)
 
 ggplot(aes(y = wage, x = height), data = pop) +
@@ -167,7 +167,7 @@ t_false_positives <- coef_data_model2 %>%
   group_by(term, incl_zero) %>%
   summarise(n = n()) %>%
   group_by(term) %>% # now group by only by term so the frequency is correct...
-  mutate(freq = n / sum(n)) # ...see the sum(n) in denominator that§s why...
+  mutate(freq_percent = n / sum(n) * 100) # ...see the sum(n) in denominator that§s why...
 
 t_false_positives
 # try increasing the number in head()
@@ -180,7 +180,7 @@ t_dist <- coef_data_model2 %>%
   ggplot(aes(statistic, fill = term)) +
   geom_histogram(aes(y = ..density..), color = "white") +
   stat_function(
-    fun = dt, args = list(df = 98),
+    fun = dt, args = list(df = 97),
     aes(color = "t_distribution"),
     size = 1.1
   ) +
