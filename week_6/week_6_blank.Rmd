@@ -24,7 +24,7 @@ library(corrplot)
 
 # Loading data
 ```{r, message=FALSE, echo=FALSE}
-data = read_csv("sleep.csv")
+data = read_csv("data/sleep.csv")
 ```
 
 

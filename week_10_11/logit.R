@@ -5,7 +5,7 @@ library(GGally)
 library(modelr)
 
 # data <- read_csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
-data <- read_csv("week_9/data/credit_scoring_sample.csv")
+data <- read_csv("week_10_11/data/credit_scoring_sample.csv")
 ggpairs(data)
 
 head(data)
@@ -16,12 +16,8 @@ data %>%
   geom_smooth(method = "glm",
               method.args = list(family = "binomial"))
 
-data %>% 
-  mutate(admit = as.factor(admit)) %>% 
-  ggplot(aes(SeriousDlqin2yrs, gre))+
-  geom_boxplot(aes(fill=admit))
-
 # train-test split --------------------------------------------------------
+
 set.seed(123) # For reproducibility
 splits <- data %>%
   modelr::resample_partition(c(train = 0.6, test = 0.2, validattion=0.2))
@@ -99,3 +95,18 @@ cat("LPM AUC-ROC:", lpm_auc, "\n")
 cat("Logit AUC-ROC:", logit_auc, "\n")
 # AUC of 0.5 says the model is no better then distinguishing betweeen the classes by chance
 
+# calculating partial effects ---------------------------------------------
+library(mfx)
+options(scipen = 999)
+
+# Marginal effects at the mean (MEM)
+logitMEM <- logitmfx(SeriousDlqin2yrs ~ .,data=train_data, atmean = TRUE)
+
+# Print the MEM results
+print(logitMEM)
+
+# Average marginal effects (AME)
+logitAME <- logitmfx(SeriousDlqin2yrs ~ .,data=train_data, atmean = FALSE)
+
+# Print the AME results
+print(logitAME)
