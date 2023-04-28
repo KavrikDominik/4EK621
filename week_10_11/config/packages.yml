@@ -27,4 +27,6 @@
 - mfx
 - pROC
 - modelr
-
+- lmtest
+- whitestrap
+- tidyverse
