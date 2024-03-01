@@ -4,6 +4,7 @@
 - stringr
 - tibble
 - broom
+- wooldridge
 - ggplot2
 - patchwork
 - stargazer
